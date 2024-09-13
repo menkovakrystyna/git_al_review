@@ -15,6 +15,11 @@ jobs:
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Ensure full history is cloned
+
+      - name: Clean workspace
+        run: git clean -fdx  # Clean workspace to avoid leftover files
 
       - name: Set up Python
         uses: actions/setup-python@v4
