@@ -2,12 +2,22 @@ import os
 import subprocess
 from openai import OpenAI
 
+'''
 # Initialize OpenAI client with the API key from the environment
 with open('api_key.txt') as file:
     val = file.readline().strip()
 
 # Initialize OpenAI client
 client = OpenAI(api_key=val)
+
+'''
+
+# Access the environment variable
+api_key = os.getenv('OPENAI_API_KEY')
+
+if api_key is None:
+    raise ValueError("No API key found. Set the OPENAI_API_KEY environment variable.")
+
 
 # Function to get the modified/added files from the latest commit
 def get_modified_files():
