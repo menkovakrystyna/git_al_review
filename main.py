@@ -56,6 +56,7 @@ class DataPreprocessor:
 
         # Создание и запуск пайплайна
         X_processed = preprocessor.fit_transform(X)
+        X_processed = preprocessor.fit_transform(X)
 
         # Сохранение обработанных данных
         self.preprocessed_data = pd.DataFrame(X_processed)
