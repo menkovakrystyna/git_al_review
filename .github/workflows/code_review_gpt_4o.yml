@@ -1,32 +1,39 @@
 name: GPT Code Review on Pull Request
 
+# This section defines when the workflow is triggered
 on:
   pull_request:
     branches:
-      - main                  # You can specify other branches where pull requests will trigger the workflow
-    types: [opened, synchronize]  # Run the workflow when a PR is created or updated
+      - '*'                        # Use a wildcard to trigger the workflow on any branch
+    types: [opened, synchronize]    # Triggers when a PR is created or updated
 
 jobs:
   gpt_code_review:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest          # Runs on the latest Ubuntu environment
 
     steps:
+      # Step 1: Checkout the code in the pull request
       - name: Checkout repository code
-        uses: actions/checkout@v3    # Step 1: Checkout the PR code
+        uses: actions/checkout@v3
 
+      # Step 2: Set up the Python environment
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'      # Step 2: Set up Python 3.x environment
+          python-version: '3.x'     # Specify the Python version to use
 
+      # Step 3: Install necessary dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install openai          # Step 3: Install OpenAI SDK for Python
+          pip install openai
 
-      - name: Read code and trigger GPT review
+      # Step 4: Run the Python script for GPT review
+      - name: Run GPT code review
         run: |
-          python script.py       # Step 4: Run your Python script
+          python .github/workflows/script.py  # Ensure the correct path to the script
 
+    # Step 5: Securely use the OpenAI API key stored in GitHub Secrets
     env:
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}  # Step 5: Securely provide the OpenAI API key
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
