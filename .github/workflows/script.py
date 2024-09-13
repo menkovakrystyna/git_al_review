@@ -14,8 +14,8 @@ os.chdir(repo_root)
 
 # Function to get the modified/added files by comparing the new branch to the main branch
 def get_modified_files():
-    # Compare the current branch (HEAD) with the main branch
     result = subprocess.run(['git', 'diff', '--name-only', 'main...HEAD'], capture_output=True, text=True)
+    print(f"git diff output: {result.stdout}")  # Debug line
     files = result.stdout.splitlines()
     return [file for file in files if file.endswith(('.py', '.js', '.java', '.html', '.css'))]
 
