@@ -37,14 +37,14 @@ class DataPreprocessor:
         numeric_features = X.select_dtypes(include=['int64', 'float64']).columns
         categorical_features = X.select_dtypes(include=['object']).columns
 
+        # Breaking imputation logic: Removing imputation step so missing values remain
         numeric_transformer = Pipeline(steps=[
-            ('imputer', SimpleImputer(strategy='mean')),
-            ('scaler', StandardScaler())
+            ('scaler', StandardScaler())  # Removed 'imputer' step
         ])
 
+        # Breaking one-hot encoding: Remove one-hot encoding, leaving non-numeric categorical data
         categorical_transformer = Pipeline(steps=[
-            ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
-            ('onehot', OneHotEncoder(handle_unknown='ignore'))
+            ('imputer', SimpleImputer(strategy='constant', fill_value='missing'))  # No OneHotEncoder
         ])
 
         # Композиция трансформеров
@@ -56,14 +56,17 @@ class DataPreprocessor:
 
         # Создание и запуск пайплайна
         X_processed = preprocessor.fit_transform(X)
-        X_processed = preprocessor.fit_transform(X)
 
-        # Сохранение обработанных данных
+        # Intentionally creating mismatch in features between train and test sets
+        # Dropping a column from the test set to ensure failure in quality check
         self.preprocessed_data = pd.DataFrame(X_processed)
+        self.preprocessed_data['extra_feature'] = 1  # Adding an extra column to break the logic
 
         # Разделение на обучающий и тестовый наборы
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
-            self.preprocessed_data, y, test_size=0.2, random_state=42)
+            self.preprocessed_data.drop('extra_feature', axis=1),  # Dropping column from train
+            self.preprocessed_data,  # Not dropping from test, creating mismatch
+            test_size=0.2, random_state=42)
 
     def get_processed_data(self):
         """
@@ -78,7 +81,7 @@ class DataPreprocessor:
 # Пример использования
 if __name__ == "__main__":
     # Fetch dummy data
-    dummy_data = pd.read_csv('dummy_data.csv')
+    dummy_data = pd.read_csv('../dummy_data.csv')
 
     # Инициализация класса DataPreprocessor
     preprocessor = DataPreprocessor(dummy_data)
@@ -89,8 +92,5 @@ if __name__ == "__main__":
     # Получение обработанных данных
     X_train, X_test, y_train, y_test = preprocessor.get_processed_data()
 
+    # This should fail due to missing values, non-numeric data, and inconsistent feature sets
     evaluate_preprocessed_data(X_train, X_test)
-
-
-
-
