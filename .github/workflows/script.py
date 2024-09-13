@@ -13,11 +13,19 @@ repo_root = subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_outp
 os.chdir(repo_root)
 
 # Function to get the modified/added files by comparing the new branch to the main branch
+import subprocess
+
+import subprocess
+
+
 def get_modified_files():
-    result = subprocess.run(['git', 'diff', '--name-only', 'main...HEAD'], capture_output=True, text=True)
+    # Get the last two commits on the main branch
+    result = subprocess.run(['git', 'diff', '--name-only', 'HEAD~1', 'HEAD'], capture_output=True, text=True)
     print(f"git diff output: {result.stdout}")  # Debug line
     files = result.stdout.splitlines()
+    # Filter only the files you're interested in
     return [file for file in files if file.endswith(('.py', '.js', '.java', '.html', '.css'))]
+
 
 # Function to read the content of modified code files
 def read_code_files(files):
