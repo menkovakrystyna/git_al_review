@@ -20,20 +20,21 @@ import subprocess
 import subprocess
 
 
+import subprocess
+
 def get_modified_files():
-    # Using `git diff` to get the changed files between the last two commits
-    result = subprocess.run(['git', 'diff', '--name-only', 'HEAD~1', 'HEAD'], capture_output=True, text=True)
+    # Using `git show` to get the files changed in the latest commit
+    result = subprocess.run(['git', 'show', '--name-only', 'HEAD'], capture_output=True, text=True)
 
     if result.returncode != 0:
-        print("Error running git diff")
+        print("Error running git show")
         return []
 
-    print(f"git diff output: {result.stdout}")  # Debug line to show file changes
+    print(f"git show output: {result.stdout}")  # Debug line to show file changes
     files = result.stdout.splitlines()
 
     # Filter the files based on your desired extensions
     return [file for file in files if file.endswith(('.py', '.js', '.java', '.html', '.css'))]
-
 
 # Example usage
 modified_files = get_modified_files()
