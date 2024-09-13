@@ -17,14 +17,27 @@ import subprocess
 
 import subprocess
 
+import subprocess
+
 
 def get_modified_files():
-    # Get the last two commits on the main branch
+    # Using `git diff` to get the changed files between the last two commits
     result = subprocess.run(['git', 'diff', '--name-only', 'HEAD~1', 'HEAD'], capture_output=True, text=True)
-    print(f"git diff output: {result.stdout}")  # Debug line
+
+    if result.returncode != 0:
+        print("Error running git diff")
+        return []
+
+    print(f"git diff output: {result.stdout}")  # Debug line to show file changes
     files = result.stdout.splitlines()
-    # Filter only the files you're interested in
+
+    # Filter the files based on your desired extensions
     return [file for file in files if file.endswith(('.py', '.js', '.java', '.html', '.css'))]
+
+
+# Example usage
+modified_files = get_modified_files()
+print("Modified files:", modified_files)
 
 
 # Function to read the content of modified code files
