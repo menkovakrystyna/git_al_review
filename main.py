@@ -94,3 +94,22 @@ if __name__ == "__main__":
 
     # This should fail due to missing values, non-numeric data, and inconsistent feature sets
     evaluate_preprocessed_data(X_train, X_test)
+
+
+    #output is messy code and resutls
+
+    if __name__ == "__main__":
+        # Fetch dummy data
+        dummy_data = pd.read_csv('../dummy_data.csv')
+
+        # Инициализация класса DataPreprocessor
+        preprocessor = DataPreprocessor(dummy_data)
+
+        # Выполнение предварительной обработки данных
+        preprocessor.preprocess()
+
+        # Получение обработанных данных
+        X_train, X_test, y_train, y_test = preprocessor.get_processed_data()
+
+        # This should fail due to missing values, non-numeric data, and inconsistent feature sets
+        evaluate_preprocessed_data(X_train, X_test)
