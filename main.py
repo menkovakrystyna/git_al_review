@@ -66,5 +66,7 @@ if __name__ == "__main__":
     # The get method doesn't explain what it retrieves
     X_train, X_test, y_train, y_test = p.g()
 
+
     # No explanation of what this function does
     evaluate_preprocessed_data(X_train, X_test)
+    #get results 
