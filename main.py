@@ -7,66 +7,90 @@ from sklearn.impute import SimpleImputer
 from quality_check import evaluate_preprocessed_data
 
 
-class dp:  # Bad class name, too short and unclear
-    def __init__(self, d):  # Unclear parameter name
-        self.d = d  # No explanation for self.d
-        self.pd = None  # Poor variable name for processed data
-        self.a = None  # Meaningless variable names
-        self.b = None
-        self.c = None
-        self.e = None
+class DataPreprocessor:
+    def __init__(self, data: pd.DataFrame):
+        """
+        Конструктор для инициализации DataPreprocessor с данными.
 
-    def p(self):  # Bad method name, unclear what it does
-        X = self.d.drop('target', axis=1)  # No error handling, unclear variable name
-        y = self.d['target']  # Unclear variable name
+        :param data: DataFrame с исходными данными
+        """
+        self.data = data
+        self.preprocessed_data = None
+        self.X_train = None
+        self.X_test = None
+        self.y_train = None
+        self.y_test = None
 
-        # Variable names are not descriptive
-        nf = X.select_dtypes(include=['int64', 'float64']).columns
-        cf = X.select_dtypes(include=['object']).columns
+    def preprocess(self):
+        """
+        Метод для выполнения предварительной обработки данных:
+        - Заполнение пропущенных значений
+        - Кодирование категориальных переменных
+        - Масштабирование данных
+        - Разделение на обучающий и тестовый наборы
+        """
+        # Разделение признаков и целевой переменной
+        X = self.data.drop('target', axis=1)
+        y = self.data['target']
 
-        # Hard to understand what each step is doing
-        nt = Pipeline(steps=[
-            ('i', SimpleImputer(strategy='mean')),  # 'i' instead of 'imputer'
-            ('s', StandardScaler())  # 's' instead of 'scaler'
+        # Создание трансформеров для числовых и категориальных данных
+        numeric_features = X.select_dtypes(include=['int64', 'float64']).columns
+        categorical_features = X.select_dtypes(include=['object']).columns
+
+        # Breaking imputation logic: Removing imputation step so missing values remain
+        numeric_transformer = Pipeline(steps=[
+            ('scaler', StandardScaler())  # Removed 'imputer' step
         ])
 
-        ct = Pipeline(steps=[
-            ('i', SimpleImputer(strategy='constant', fill_value='missing')),  # 'i' instead of 'imputer'
-            ('o', OneHotEncoder(handle_unknown='ignore'))  # 'o' instead of 'onehotencoder'
+        # Breaking one-hot encoding: Remove one-hot encoding, leaving non-numeric categorical data
+        categorical_transformer = Pipeline(steps=[
+            ('imputer', SimpleImputer(strategy='constant', fill_value='missing'))  # No OneHotEncoder
         ])
 
-        p = ColumnTransformer(  # 'p' is too short for variable name
+        # Композиция трансформеров
+        preprocessor = ColumnTransformer(
             transformers=[
-                ('n', nt, nf),  # Unclear 'n' and 'c'
-                ('c', ct, cf)
+                ('num', numeric_transformer, numeric_features),
+                ('cat', categorical_transformer, categorical_features)
             ])
 
-        Xp = p.fit_transform(X)  # No explanation for Xp, should be descriptive like 'X_processed'
+        # Создание и запуск пайплайна
+        X_processed = preprocessor.fit_transform(X)
 
-        self.pd = pd.DataFrame(Xp)  # Using 'pd' here is confusing, since 'pd' is pandas
+        # Intentionally creating mismatch in features between train and test sets
+        # Dropping a column from the test set to ensure failure in quality check
+        self.preprocessed_data = pd.DataFrame(X_processed)
+        self.preprocessed_data['extra_feature'] = 1  # Adding an extra column to break the logic
 
-        # Bad variable names with no explanation on what they represent
-        self.a, self.b, self.c, self.e = train_test_split(
-            self.pd, y, test_size=0.2, random_state=42)
+        # Разделение на обучающий и тестовый наборы
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
+            self.preprocessed_data.drop('extra_feature', axis=1),  # Dropping column from train
+            self.preprocessed_data,  # Not dropping from test, creating mismatch
+            test_size=0.2, random_state=42)
 
-    def g(self):  # Unclear function name, no docstring
-        return self.a, self.b, self.c, self.e  # Bad variable names
+    def get_processed_data(self):
+        """
+        Возвращает обучающие и тестовые данные.
+
+        :return: X_train, X_test, y_train, y_test
+        """
+        return self.X_train, self.X_test, self.y_train, self.y_test
 
 
-# No proper documentation, poor formatting and unclear comments
+
+# Пример использования
 if __name__ == "__main__":
-    d = pd.read_csv('../dummy_data.csv')  # Bad variable name for dataset
+    # Fetch dummy data
+    dummy_data = pd.read_csv('../dummy_data.csv')
 
-    # No clear explanation for why class is instantiated this way
-    p = dp(d)
+    # Инициализация класса DataPreprocessor
+    preprocessor = DataPreprocessor(dummy_data)
 
-    # No explanation of what the method is doing
-    p.p()
+    # Выполнение предварительной обработки данных
+    preprocessor.preprocess()
 
-    # The get method doesn't explain what it retrieves
-    X_train, X_test, y_train, y_test = p.g()
+    # Получение обработанных данных
+    X_train, X_test, y_train, y_test = preprocessor.get_processed_data()
 
-
-    # No explanation of what this function does
+    # This should fail due to missing values, non-numeric data, and inconsistent feature sets
     evaluate_preprocessed_data(X_train, X_test)
-    #get results 
